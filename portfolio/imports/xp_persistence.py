@@ -42,6 +42,7 @@ def _income_dedupe_key(
         "gross_amount": _decimal_text(item["gross_amount"]),
         "net_amount": _decimal_text(item["net_amount"]),
         "expected_payment_date": item["expected_payment_date"],
+        "occurrence": occurrence,
     }
 
     payload = json.dumps(
@@ -157,6 +158,12 @@ def import_xp_data(
         )
 
     account_code = data["account_code"]
+
+    if account_code != "7737516":
+        raise ValueError(
+            f"Conta XP não autorizada para este importador: {account_code}"
+        )
+
     snapshot_date = data["snapshot_date"]
     file_hash = data["sha256"]
 
@@ -293,6 +300,7 @@ def import_xp_data(
         # Cadastro de ativos e gravação dos proventos.
         incomes_inserted = 0
         incomes_duplicated = 0
+        income_occurrences: dict[str, int] = {}
 
         for item in data["incomes"]:
             symbol = item["symbol"]
@@ -311,10 +319,21 @@ def import_xp_data(
 
             asset_id = _get_or_create_asset(con, asset_data)
 
+            base_key = _income_dedupe_key(
+                account_id,
+                symbol,
+                item,
+                occurrence=0,
+            )
+
+            occurrence = income_occurrences.get(base_key, 0) + 1
+            income_occurrences[base_key] = occurrence
+
             dedupe_key = _income_dedupe_key(
                 account_id,
                 symbol,
                 item,
+                occurrence=occurrence,
             )
 
             cursor = con.execute(
