@@ -241,6 +241,27 @@ Tabelas principais:
 O banco é um artefato local e não deve ser enviado ao Git por padrão.
 Faça backups separados.
 
+## Carteira de investimentos XP
+
+O projeto também possui um módulo para leitura e persistência da
+carteira de investimentos da XP, utilizando o mesmo banco SQLite.
+
+Recursos:
+
+- Leitura da planilha XP (`Sua carteira`).
+- Validação de posições, proventos e totais.
+- Cadastro de contas e ativos.
+- Histórico de posições por snapshot.
+- Registro de dividendos, JCP e rendimentos provisionados.
+- Deduplicação de arquivos e proventos.
+- Migrações versionadas do schema da carteira.
+
+A importação é independente do scanner Binance e não envia dados
+financeiros pessoais ao ThingsBoard.
+
+Consulte [`docs/XP_IMPORT.md`](docs/XP_IMPORT.md) para instruções
+de prévia, migração, importação e testes.
+
 ## Integração com ThingsBoard
 
 O publicador envia telemetria para:
