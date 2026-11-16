@@ -9,10 +9,7 @@ __pycache__/
 .env.*
 
 # Banco de dados e arquivos SQLite
-data/*.db
-data/*.db-*
-data/*.sqlite
-data/*.sqlite3
+data/
 
 # Backups
 backups/
