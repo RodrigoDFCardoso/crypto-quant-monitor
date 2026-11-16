@@ -21,11 +21,13 @@ def _as_float(value: Decimal | None) -> float | None:
     return float(value) if value is not None else None
 
 
-def _decimal_text(value: Decimal | None) -> str | None:
+def _decimal_text(value: Decimal | int | float | str | None) -> str | None:
     if value is None:
         return None
-    return format(value.normalize(), "f")
 
+    decimal_value = value if isinstance(value, Decimal) else Decimal(str(value))
+
+    return format(decimal_value.normalize(), "f")
 
 def _income_dedupe_key(
     account_id: int,
