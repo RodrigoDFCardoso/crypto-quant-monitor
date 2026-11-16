@@ -31,6 +31,7 @@ def _income_dedupe_key(
     account_id: int,
     asset_symbol: str,
     item: dict[str, Any],
+    occurrence: int,
 ) -> str:
     identity = {
         "account_id": account_id,
