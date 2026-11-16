@@ -67,6 +67,7 @@ Dependências Python:
 
 -   `pandas`
 -   `requests`
+-   `openpyxl` (leitura da planilha XP)
 
 ## Instalação
 
@@ -325,6 +326,36 @@ O `.gitignore` deste pacote cobre os artefatos locais mais comuns.
 -   Resultados em `signal_outcomes` permanecem `PENDING` até o horizonte
     vencer e existir candle posterior utilizável.
 
+
+## Módulo de carteira (XP/B3 e Binance Spot)
+
+O módulo `portfolio/` compartilha o mesmo banco `data/crypto_market.db` do
+scanner. Ele adiciona tabelas próprias com prefixo `portfolio_`, sem recriar
+nem substituir as tabelas de candles, sinais ou auditoria do scanner. A posição
+XP inicial é tratada como uma fotografia da carteira, não como reconstrução de
+compras históricas.
+
+Antes de usar o módulo no banco do Raspberry Pi, faça backup e aplique as
+migrações versionadas conforme [`docs/DATABASE.md`](docs/DATABASE.md):
+
+```bash
+python -m portfolio.migrate
+python -m portfolio.migrate --status
+python -m unittest discover -s portfolio/tests -v
+```
+
+O leitor da planilha XP está em modo **dry-run** e não grava posições ou
+proventos no banco nesta etapa:
+
+```bash
+python -m portfolio.imports.xp
+# ou: python -m portfolio.imports.xp --file /caminho/arquivo.xlsx
+```
+
+Consulte [`docs/PORTFOLIO.md`](docs/PORTFOLIO.md) para o modelo de dados e
+[`docs/XP_IMPORT.md`](docs/XP_IMPORT.md) para o formato do arquivo. A planilha
+real deve permanecer em `imports/xp/`, diretório ignorado pelo Git.
+
 ## Estrutura real do repositório
 
 A árvore abaixo reflete a estrutura atual do repositório no Git. Os diretórios `data/` e `logs/` são criados localmente durante a execução e não aparecem na árvore versionada porque são ignorados pelo `.gitignore`.
@@ -339,8 +370,25 @@ crypto/
 ├── scanner.py
 ├── thingsboard_publisher.py
 │
+├── portfolio/                    # carteira e importadores (SQLite compartilhado)
+│   ├── __init__.py
+│   ├── db.py
+│   ├── migrate.py
+│   ├── schema.sql
+│   ├── imports/
+│   │   ├── __init__.py
+│   │   └── xp.py
+│   └── tests/
+│       ├── __init__.py
+│       ├── test_db.py
+│       ├── test_migrations.py
+│       └── test_xp_parser.py
+│
 ├── docs/
-│   └── THINGSBOARD.md
+│   ├── DATABASE.md
+│   ├── PORTFOLIO.md
+│   ├── THINGSBOARD.md
+│   └── XP_IMPORT.md
 │
 ├── old/                         # versões anteriores e scripts históricos
 │   ├── analise_trade.py
